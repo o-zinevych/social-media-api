@@ -1,3 +1,7 @@
+import pathlib
+import uuid
+from pathlib import Path
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import (
     AbstractUser,
@@ -63,6 +67,11 @@ class UserManager(DjangoUserManager):
         return await self._acreate_user(email, password, **extra_fields)
 
 
+def custom_image_path(instance, filename) -> Path:
+    filename = f"{instance.id}-{uuid.uuid4()}" + pathlib.Path(filename).suffix
+    return pathlib.Path("profile-pictures") / pathlib.Path(filename)
+
+
 class User(AbstractUser):
     """User model to register with email"""
 
@@ -81,6 +90,13 @@ class User(AbstractUser):
         },
     )
     bio = models.CharField(_("bio"), max_length=255, blank=True)
+    image = models.ImageField(_("image"), upload_to=custom_image_path, blank=True)
+    followers = models.ManyToManyField(
+        "self", related_name="following_users", symmetrical=False
+    )
+    following = models.ManyToManyField(
+        "self", related_name="followed_users", symmetrical=False
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
