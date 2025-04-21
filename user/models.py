@@ -2,6 +2,7 @@ import pathlib
 import uuid
 from pathlib import Path
 
+from django.apps import apps
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import (
     AbstractUser,
@@ -19,7 +20,16 @@ class UserManager(DjangoUserManager):
         if not email:
             raise ValueError("The given email must be set")
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+
+        username = extra_fields.pop("username", None)
+        if not username:
+            username = email.split("@")[0]
+        GlobalUserModel = apps.get_model(
+            self.model._meta.app_label, self.model._meta.object_name
+        )
+        username = GlobalUserModel.normalize_username(username)
+
+        user = self.model(username=username, email=email, **extra_fields)
         user.password = make_password(password)
         return user
 
