@@ -107,6 +107,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# DRF Settings
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication"
+    ]
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
