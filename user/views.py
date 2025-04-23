@@ -1,4 +1,5 @@
-from rest_framework import generics, status
+from django.contrib.auth import get_user_model
+from rest_framework import generics, status, viewsets, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.compat import coreapi, coreschema
@@ -8,7 +9,12 @@ from rest_framework.schemas import coreapi as coreapi_schema, ManualSchema
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
-from user.serializers import UserSerializer, UserTokenSerializer
+from user.serializers import (
+    UserSerializer,
+    UserUpdateSerializer,
+    UserRetrieveSerializer,
+    UserTokenSerializer,
+)
 
 
 class RegisterUserView(generics.CreateAPIView):
@@ -62,3 +68,15 @@ class LogoutUserView(APIView):
             return Response(
                 {"detail": "Token not found."}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+class ManageUserView(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user
+
+    def get_serializer_class(self):
+        if self.request.method == "PUT" or self.request.method == "PATCH":
+            return UserUpdateSerializer
+        return UserRetrieveSerializer
