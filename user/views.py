@@ -1,8 +1,8 @@
-from django.contrib.auth import get_user_model
-from rest_framework import generics, status, viewsets, mixins
+from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.compat import coreapi, coreschema
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.schemas import coreapi as coreapi_schema, ManualSchema
@@ -13,6 +13,7 @@ from user.serializers import (
     UserSerializer,
     UserUpdateSerializer,
     UserRetrieveSerializer,
+    UserImageSerializer,
     UserTokenSerializer,
 )
 
@@ -80,3 +81,17 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
         if self.request.method == "PUT" or self.request.method == "PATCH":
             return UserUpdateSerializer
         return UserRetrieveSerializer
+
+
+class UserImageUploadView(APIView):
+    permission_classes = (IsAuthenticated,)
+    parser_classes = (MultiPartParser, FormParser)
+    serializer_class = UserImageSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(
+            request.user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

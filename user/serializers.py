@@ -69,6 +69,12 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
         )
 
 
+class UserImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ("image",)
+
+
 class UserTokenSerializer(AuthTokenSerializer):
     username = None
     email = serializers.CharField(label=_("Email"), write_only=True)
