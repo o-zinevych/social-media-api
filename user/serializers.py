@@ -55,6 +55,9 @@ class UserUpdateSerializer(UserSerializer):
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
+    followers = serializers.StringRelatedField(many=True)
+    following = serializers.StringRelatedField(many=True)
+
     class Meta:
         model = get_user_model()
         fields = read_only_fields = (
