@@ -3,6 +3,7 @@ from rest_framework import generics, status, viewsets, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.compat import coreapi, coreschema
+from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -119,6 +120,34 @@ class UserViewSet(
         return queryset
 
     def get_serializer_class(self):
-        if self.action == "retrieve":
+        if self.action in ("retrieve", "follow"):
             return UserRetrieveSerializer
         return UserSerializer
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="follow",
+        permission_classes=[IsAuthenticated],
+    )
+    def follow(self, request, pk=None):
+        current_user = request.user
+        user_to_follow = self.get_object()
+
+        if current_user.id == user_to_follow.id:
+            return Response(
+                {"detail": "You cannot follow yourself."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if current_user in user_to_follow.followers.all():
+            return Response(
+                {"detail": "You are already following this user."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        user_to_follow.followers.add(current_user)
+        current_user.following.add(user_to_follow)
+        return Response(
+            {"detail": "Successfully followed this user."}, status=status.HTTP_200_OK
+        )

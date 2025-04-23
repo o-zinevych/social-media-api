@@ -57,7 +57,7 @@ class UserUpdateSerializer(UserSerializer):
 class UserRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = (
+        fields = read_only_fields = (
             "id",
             "email",
             "username",
