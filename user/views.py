@@ -16,6 +16,7 @@ from user.serializers import (
     UserUpdateSerializer,
     UserRetrieveSerializer,
     UserImageSerializer,
+    UserFollowingSerializer,
     UserTokenSerializer,
 )
 
@@ -120,8 +121,10 @@ class UserViewSet(
         return queryset
 
     def get_serializer_class(self):
-        if self.action in ("retrieve", "follow"):
+        if self.action == "retrieve":
             return UserRetrieveSerializer
+        if self.action in ("follow", "unfollow"):
+            return UserFollowingSerializer
         return UserSerializer
 
     @action(
@@ -150,4 +153,32 @@ class UserViewSet(
         current_user.following.add(user_to_follow)
         return Response(
             {"detail": "Successfully followed this user."}, status=status.HTTP_200_OK
+        )
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="unfollow",
+        permission_classes=[IsAuthenticated],
+    )
+    def unfollow(self, request, pk=None):
+        current_user = request.user
+        user_to_unfollow = self.get_object()
+
+        if current_user.id == user_to_unfollow.id:
+            return Response(
+                {"detail": "You cannot unfollow yourself."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if current_user not in user_to_unfollow.followers.all():
+            return Response(
+                {"detail": "You aren't following this user."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        user_to_unfollow.followers.remove(current_user)
+        current_user.following.remove(user_to_unfollow)
+        return Response(
+            {"detail": "Successfully unfollowed this user."}, status=status.HTTP_200_OK
         )

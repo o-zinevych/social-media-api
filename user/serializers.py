@@ -60,7 +60,7 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = read_only_fields = (
+        fields = (
             "id",
             "email",
             "username",
@@ -77,6 +77,12 @@ class UserImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("image",)
+
+
+class UserFollowingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ()
 
 
 class UserTokenSerializer(AuthTokenSerializer):
