@@ -40,3 +40,20 @@ class Post(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class Comment(models.Model):
+    comment = models.CharField(_("comment"), max_length=255)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET(get_sentinel_user),
+        related_name="comments",
+    )
+    posted_at = models.DateTimeField(_("posted at"), auto_now_add=True)
+
+    class Meta:
+        ordering = ("-posted_at",)
+
+    def __str__(self):
+        return self.comment
