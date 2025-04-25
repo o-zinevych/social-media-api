@@ -5,12 +5,26 @@ from content.models import Post
 
 class PostSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
+    likes = serializers.IntegerField(read_only=True, source="likes_count")
+    liked_by_me = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
-        fields = ("id", "text", "image", "user", "posted_at")
+        fields = ("id", "text", "image", "user", "posted_at", "likes", "liked_by_me")
         read_only_fields = (
             "id",
             "user",
             "posted_at",
+            "likes",
+            "liked_by_me",
         )
+
+    def get_liked_by_me(self, obj):
+        user = self.context["request"].user
+        return obj.likes.filter(id=user.id).exists()
+
+
+class PostLikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ()

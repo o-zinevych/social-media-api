@@ -5,11 +5,10 @@ from rest_framework.response import Response
 
 from content.models import Post
 from content.permissions import IsOwnerOrReadOnly
-from content.serializers import PostSerializer
+from content.serializers import PostSerializer, PostLikeSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    serializer_class = PostSerializer
     permission_classes = (IsOwnerOrReadOnly,)
 
     def get_queryset(self):
@@ -19,6 +18,11 @@ class PostViewSet(viewsets.ModelViewSet):
         if text:
             queryset = queryset.filter(text__icontains=text)
         return queryset
+
+    def get_serializer_class(self):
+        if self.action == "like":
+            return PostLikeSerializer
+        return PostSerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -57,3 +61,24 @@ class PostViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(followed_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="like",
+        permission_classes=[IsAuthenticated],
+    )
+    def like(self, request, pk=None):
+        post = self.get_object()
+        post_likes = post.likes.all()
+
+        if self.request.user in post_likes:
+            post.likes.remove(self.request.user)
+            return Response(
+                {"detail": "You've removed your like."}, status=status.HTTP_200_OK
+            )
+
+        post.likes.add(self.request.user)
+        return Response(
+            {"detail": "You've liked this post."}, status=status.HTTP_200_OK
+        )

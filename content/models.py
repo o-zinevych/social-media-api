@@ -29,9 +29,14 @@ class Post(models.Model):
         related_name="posts",
     )
     posted_at = models.DateTimeField(_("posted at"), auto_now_add=True)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="likes")
 
     class Meta:
         ordering = ("-posted_at",)
+
+    @property
+    def likes_count(self):
+        return self.likes.count()
 
     def __str__(self):
         return self.text
