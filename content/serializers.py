@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from content.models import Post
+from content.models import Post, Comment
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -28,3 +28,12 @@ class PostLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ()
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ("comment", "user", "posted_at")
+        read_only_fields = ("user", "posted_at")

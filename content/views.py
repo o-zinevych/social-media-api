@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from content.models import Post
 from content.permissions import IsOwnerOrReadOnly
-from content.serializers import PostSerializer, PostLikeSerializer
+from content.serializers import PostSerializer, PostLikeSerializer, CommentSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -22,6 +22,8 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "like":
             return PostLikeSerializer
+        if self.action == "comment":
+            return CommentSerializer
         return PostSerializer
 
     def perform_create(self, serializer):
@@ -100,3 +102,16 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(
             {"detail": "You've liked this post."}, status=status.HTTP_200_OK
         )
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="comment",
+        permission_classes=[IsAuthenticated],
+    )
+    def comment(self, request, pk=None):
+        post = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(post=post, user=self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
