@@ -9,9 +9,16 @@ from content.serializers import PostSerializer
 
 
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.select_related("user")
     serializer_class = PostSerializer
     permission_classes = (IsOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        queryset = Post.objects.select_related("user")
+
+        text = self.request.query_params.get("text")
+        if text:
+            queryset = queryset.filter(text__icontains=text)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

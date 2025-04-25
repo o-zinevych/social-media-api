@@ -6,6 +6,6 @@ from content.views import PostViewSet
 app_name = "content"
 
 router = DefaultRouter()
-router.register("posts", PostViewSet)
+router.register("posts", PostViewSet, basename="post")
 
 urlpatterns = [path("", include(router.urls))]
