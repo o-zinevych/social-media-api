@@ -32,3 +32,21 @@ class PostViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(my_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        methods=["GET"],
+        detail=False,
+        url_path="following",
+        permission_classes=[IsAuthenticated],
+    )
+    def following(self, request, *args, **kwargs):
+        user = self.request.user
+        followed_posts = self.get_queryset().filter(user__in=user.following.all())
+
+        page = self.paginate_queryset(followed_posts)
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(followed_posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
