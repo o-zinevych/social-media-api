@@ -56,4 +56,4 @@ class Comment(models.Model):
         ordering = ("-posted_at",)
 
     def __str__(self):
-        return self.comment
+        return f"@{self.user.username}: {self.comment}"

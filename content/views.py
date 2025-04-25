@@ -5,7 +5,12 @@ from rest_framework.response import Response
 
 from content.models import Post
 from content.permissions import IsOwnerOrReadOnly
-from content.serializers import PostSerializer, PostLikeSerializer, CommentSerializer
+from content.serializers import (
+    PostSerializer,
+    PostLikeSerializer,
+    CommentSerializer,
+    PostRetrieveSerializer,
+)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -22,6 +27,8 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "like":
             return PostLikeSerializer
+        if self.action == "retrieve":
+            return PostRetrieveSerializer
         if self.action == "comment":
             return CommentSerializer
         return PostSerializer

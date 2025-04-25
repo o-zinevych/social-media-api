@@ -24,6 +24,13 @@ class PostSerializer(serializers.ModelSerializer):
         return obj.likes.filter(id=user.id).exists()
 
 
+class PostRetrieveSerializer(PostSerializer):
+    comments = serializers.StringRelatedField(many=True, read_only=True)
+
+    class Meta(PostSerializer.Meta):
+        fields = PostSerializer.Meta.fields + ("comments",)
+
+
 class PostLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
