@@ -63,6 +63,24 @@ class PostViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
+        methods=["GET"],
+        detail=False,
+        url_path="liked-posts",
+        permission_classes=[IsAuthenticated],
+    )
+    def liked_posts(self, request, *args, **kwargs):
+        user = self.request.user
+        liked_posts = self.get_queryset().filter(likes=user.id)
+
+        page = self.paginate_queryset(liked_posts)
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(liked_posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
         methods=["POST"],
         detail=True,
         url_path="like",
