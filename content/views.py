@@ -1,4 +1,7 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from content.models import Post
 from content.permissions import IsOwnerOrReadOnly
@@ -12,3 +15,20 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @action(
+        methods=["GET"],
+        detail=False,
+        url_path="my-posts",
+        permission_classes=[IsAuthenticated],
+    )
+    def my_posts(self, request, *args, **kwargs):
+        my_posts = self.get_queryset().filter(user=self.request.user)
+        page = self.paginate_queryset(my_posts)
+
+        if page:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(my_posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
