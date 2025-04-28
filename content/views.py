@@ -1,4 +1,10 @@
-from rest_framework import viewsets, status
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiExample,
+    OpenApiResponse,
+    inline_serializer,
+)
+from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -87,6 +93,25 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(liked_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="Like Response", fields={"detail": serializers.CharField()}
+            ),
+        },
+        description="Like or unlike a retrieved post.",
+        examples=[
+            OpenApiExample(
+                "Liked", value={"detail": "You've liked this post."}, response_only=True
+            ),
+            OpenApiExample(
+                "Unliked",
+                value={"detail": "You've removed your like."},
+                response_only=True,
+            ),
+        ],
+    )
     @action(
         methods=["POST"],
         detail=True,
