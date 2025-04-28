@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status, viewsets, mixins
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -126,6 +127,25 @@ class UserViewSet(
         if self.action in ("follow", "unfollow"):
             return UserFollowingSerializer
         return UserSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="username",
+                description="Filter user list by case-insensitive username.",
+            ),
+            OpenApiParameter(
+                name="first_name",
+                description="Filter user list by case-insensitive first name.",
+            ),
+            OpenApiParameter(
+                name="last_name",
+                description="Filter user list by case-insensitive last name.",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     @action(
         methods=["POST"],
