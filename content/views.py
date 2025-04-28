@@ -87,6 +87,18 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(followed_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="page",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="A page number within the paginated result set.",
+            )
+        ],
+        responses={200: PostSerializer(many=True)},
+        description="Returns a page of posts that you liked.",
+    )
     @action(
         methods=["GET"],
         detail=False,
