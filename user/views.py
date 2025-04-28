@@ -118,6 +118,8 @@ class ManageUserView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class UserImageUploadView(APIView):
+    """Upload or change current user's profile picture."""
+
     permission_classes = (IsAuthenticated,)
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = UserImageSerializer
