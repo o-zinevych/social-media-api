@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from content.models import Post
+from content.models import Post, Comment
 from content.permissions import IsOwnerOrReadOnly
 from content.serializers import (
     PostSerializer,
@@ -29,8 +29,6 @@ class PostViewSet(viewsets.ModelViewSet):
             return PostLikeSerializer
         if self.action == "retrieve":
             return PostRetrieveSerializer
-        if self.action == "comment":
-            return CommentSerializer
         return PostSerializer
 
     def perform_create(self, serializer):
@@ -110,15 +108,16 @@ class PostViewSet(viewsets.ModelViewSet):
             {"detail": "You've liked this post."}, status=status.HTTP_200_OK
         )
 
-    @action(
-        methods=["POST"],
-        detail=True,
-        url_path="comment",
-        permission_classes=[IsAuthenticated],
-    )
-    def comment(self, request, pk=None):
-        post = self.get_object()
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(post=post, user=self.request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = (IsOwnerOrReadOnly,)
+
+    def get_queryset(self):
+        post_pk = self.kwargs.get("post_pk")
+        return Comment.objects.filter(post_id=post_pk)
+
+    def perform_create(self, serializer):
+        post_pk = self.kwargs.get("post_pk")
+        post = Post.objects.get(pk=post_pk)
+        serializer.save(user=self.request.user, post=post)
