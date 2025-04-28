@@ -213,6 +213,39 @@ class UserViewSet(
             {"detail": "Successfully followed this user."}, status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="Unfollow Response", fields={"detail": serializers.CharField()}
+            ),
+            403: inline_serializer(
+                name="Cannot Unfollow Response",
+                fields={"detail": serializers.CharField()},
+            ),
+        },
+        description="Unfollow specified user.",
+        examples=[
+            OpenApiExample(
+                "Unfollowed",
+                value={"detail": "Successfully unfollowed this user."},
+                response_only=True,
+                status_codes=[200],
+            ),
+            OpenApiExample(
+                "Not following",
+                value={"detail": "You aren't following this user."},
+                response_only=True,
+                status_codes=[403],
+            ),
+            OpenApiExample(
+                "Yourself",
+                value={"detail": "You cannot unfollow yourself."},
+                response_only=True,
+                status_codes=[403],
+            ),
+        ],
+    )
     @action(
         methods=["POST"],
         detail=True,
