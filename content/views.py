@@ -1,8 +1,8 @@
 from drf_spectacular.utils import (
     extend_schema,
     OpenApiExample,
-    OpenApiResponse,
     inline_serializer,
+    OpenApiParameter,
 )
 from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
@@ -57,6 +57,18 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(my_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="page",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="A page number within the paginated result set.",
+            )
+        ],
+        responses={200: PostSerializer(many=True)},
+        description="Returns a page of posts by users you follow.",
+    )
     @action(
         methods=["GET"],
         detail=False,
