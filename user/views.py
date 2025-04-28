@@ -67,6 +67,31 @@ class LogoutUserView(APIView):
 
     permission_classes = (IsAuthenticated,)
 
+    @extend_schema(
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="Token Removed", fields={"detail": serializers.CharField()}
+            ),
+            404: inline_serializer(
+                name="Token Not Found", fields={"detail": serializers.CharField()}
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Logout",
+                value={"detail": "Successfully logged out."},
+                response_only=True,
+                status_codes=[200],
+            ),
+            OpenApiExample(
+                "No token found",
+                value={"detail": "Token not found."},
+                response_only=True,
+                status_codes=[404],
+            ),
+        ],
+    )
     def post(self, request, *args, **kwargs):
         try:
             token = Token.objects.get(user=request.user)
