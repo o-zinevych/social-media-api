@@ -74,7 +74,7 @@ class LogoutUserView(APIView):
             )
 
 
-class ManageUserView(generics.RetrieveUpdateAPIView):
+class ManageUserView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
