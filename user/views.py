@@ -1,6 +1,11 @@
 from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import generics, status, viewsets, mixins
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiParameter,
+    inline_serializer,
+    OpenApiExample,
+)
+from rest_framework import generics, status, viewsets, mixins, serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.compat import coreapi, coreschema
@@ -147,6 +152,39 @@ class UserViewSet(
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @extend_schema(
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="Follow Response", fields={"detail": serializers.CharField()}
+            ),
+            403: inline_serializer(
+                name="Cannot Follow Response",
+                fields={"detail": serializers.CharField()},
+            ),
+        },
+        description="Follow specified user.",
+        examples=[
+            OpenApiExample(
+                "Followed",
+                value={"detail": "Successfully followed this user."},
+                response_only=True,
+                status_codes=[200],
+            ),
+            OpenApiExample(
+                "Already following",
+                value={"detail": "You are already following this user."},
+                response_only=True,
+                status_codes=[403],
+            ),
+            OpenApiExample(
+                "Yourself",
+                value={"detail": "You cannot follow yourself."},
+                response_only=True,
+                status_codes=[403],
+            ),
+        ],
+    )
     @action(
         methods=["POST"],
         detail=True,
