@@ -40,6 +40,18 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="page",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="A page number within the paginated result set.",
+            )
+        ],
+        responses={200: PostSerializer(many=True)},
+        description="Returns a page of your (current user's) posts.",
+    )
     @action(
         methods=["GET"],
         detail=False,
