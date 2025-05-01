@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "user",
     "content",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
