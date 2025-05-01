@@ -7,10 +7,22 @@ class PostSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
     likes = serializers.IntegerField(read_only=True, source="likes_count")
     liked_by_me = serializers.SerializerMethodField(read_only=True)
+    scheduled_at = serializers.DateTimeField(
+        write_only=True, required=False, allow_null=True
+    )
 
     class Meta:
         model = Post
-        fields = ("id", "text", "image", "user", "posted_at", "likes", "liked_by_me")
+        fields = (
+            "id",
+            "text",
+            "image",
+            "scheduled_at",
+            "user",
+            "posted_at",
+            "likes",
+            "liked_by_me",
+        )
         read_only_fields = (
             "id",
             "user",

@@ -23,11 +23,11 @@ class PostViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOwnerOrReadOnly,)
 
     def get_queryset(self):
-        queryset = Post.objects.select_related("user")
+        queryset = Post.objects.select_related("user").filter(is_published=True)
 
         text = self.request.query_params.get("text")
         if text:
-            queryset = queryset.filter(text__icontains=text)
+            queryset = queryset.filter(text__icontains=text).distinct()
         return queryset
 
     def get_serializer_class(self):
@@ -38,7 +38,13 @@ class PostViewSet(viewsets.ModelViewSet):
         return PostSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        schedule_time = self.request.data.get("scheduled_at")
+        if schedule_time:
+            serializer.save(
+                user=self.request.user, scheduled_at=schedule_time, is_published=False
+            )
+        else:
+            serializer.save(user=self.request.user)
 
     @extend_schema(
         parameters=[

@@ -32,6 +32,13 @@ class Post(models.Model):
     )
     posted_at = models.DateTimeField(_("posted at"), auto_now_add=True)
     likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="likes")
+    scheduled_at = models.DateTimeField(
+        _("scheduled at"),
+        null=True,
+        blank=True,
+        help_text=_("Specify when to publish the post (optional)."),
+    )
+    is_published = models.BooleanField(default=True)
 
     class Meta:
         ordering = ("-posted_at",)
